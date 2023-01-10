@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@near-wallet-selector/core": "^3.0.2",
-    "@near-wallet-selector/near-wallet": "^3.0.2",
+    "@near-wallet-selector/near-wallet": "^7.4.0",
     "@near-wallet-selector/sender": "^3.0.2",
     "axios": "^1.2.2",
     "big.js": "^6.1.1",
