@@ -36,7 +36,7 @@
     "@near-wallet-selector/near-wallet": "^7.4.0",
     "@near-wallet-selector/sender": "^3.0.2",
     "axios": "^1.2.2",
-    "big.js": "^6.1.1",
+    "big.js": "^6.2.1",
     "env-cmd": "^10.1.0",
     "moment": "^2.29.3",
     "near-api-js": "^1.1.0",
