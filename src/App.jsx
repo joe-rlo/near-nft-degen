@@ -8,8 +8,6 @@ import { providers, utils } from "near-api-js";
 import axios from 'axios';
 import Switch from '@mui/material/Switch';
 
-const SUGGESTED_DONATION = '0';
-const BOATLOAD_OF_GAS = Big(3).times(10 ** 13).toFixed();
 
 const App = () => {
   const [account, setAccount] = useState(null);
@@ -79,7 +77,7 @@ const App = () => {
     const API_ENDPOINT = 'https://byz-multi-chain-01.hasura.app/v1/graphql';
 
     const fetchListingsQuery = `
-    query Listing {
+    query FETCH_LISTINGS {
       near {
         nft_state_list(
           limit: 10
@@ -190,10 +188,10 @@ const App = () => {
 function Listing({ randomRecord }) {
   console.log(randomRecord);
   console.log(randomRecord.list_contract.contract_key);
-  const buy = (e) => {
-    e.preventDefault();
-
-    selector.signAndSendTransactions({
+  console.log(randomRecord.list_price_str);
+  const buy = async (e) => {
+    
+  await selector.signAndSendTransactions({
       transactions: [
         {
           receiverId: randomRecord.list_contract.contract_key,
@@ -241,8 +239,6 @@ function Listing({ randomRecord }) {
 function DegenListing({ randomRecord }) {
   console.log(randomRecord);
   const buy = (e) => {
-    e.preventDefault();
-
     selector.signAndSendTransactions({
       transactions: [
         {
