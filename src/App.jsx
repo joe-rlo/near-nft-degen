@@ -55,7 +55,7 @@ const App = () => {
   const signOut = () => {
     selector.signOut().catch((err) => {
       console.log("Failed to sign out");
-      console.error(err);
+      console.log(err);
     });
   };
 
@@ -76,15 +76,15 @@ const App = () => {
   // Load the data from a JSON file and select a random record
   async function loadAndSelectRandomRecord() {
    
-    const API_ENDPOINT = 'https://byz-full-preview.hasura.app/v1/graphql';
+    const API_ENDPOINT = 'https://byz-multi-chain-01.hasura.app/v1/graphql';
 
     const fetchListingsQuery = `
-      query FETCH_LISTINGS($where: nft_state_list_bool_exp!, $order_by: [nft_state_list_order_by!], $offset: Int = 0, $limit: Int) {
-        listings: nft_state_list(
-          where: $where
-          order_by: $order_by
-          offset: $offset
-          limit: $limit
+    query Listing {
+      near {
+        nft_state_list(
+          limit: 10
+          order_by: {list_block_datetime: desc}
+          where: {listed: {_eq: true}}
         ) {
           id
           list_price
@@ -97,7 +97,7 @@ const App = () => {
             contract_key
             base_marketplace_uri
             token_uri
-            nft_meta {
+            nft_metas {
               image
             }
           }
@@ -120,50 +120,25 @@ const App = () => {
           }
         }
       }
+    }
     `;
     
-    const variables = {
-        "where": {
-          "listed": {
-            "_eq": true
-          },
-          "nft_state": {
-            "nft_meta": {
-              "smart_contract": {
-                "chain": {
-                  "coin": {
-                    "_in": [
-                      "NEAR"
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "order_by": {
-          "list_block_datetime": "desc",
-          "id": "asc"
-        },
-        "offset": 0,
-        "limit": 5
-    };
+    
     
     const res = await axios.post(API_ENDPOINT, {
-      query: fetchListingsQuery,
-      variables: variables,
+      query: fetchListingsQuery
     },{
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key' : 'oGaXHxb.996b18d1799866dc790c377da172da43',
-        'Hasura-Client-Name' : 'byzantion.xyz.demo' 
+        'x-api-key' : 'faaA4Jc.358b884afd7ba87d7385c26b22609756',
+        'Hasura-Client-Name' : 'Ready Layer One' 
       }
     });
     
    
     const { data } = res;
 
-    setRandomRecord(selectRandomRecord(data.data.listings));
+    setRandomRecord(selectRandomRecord(data.data.near.nft_state_list));
   }
 
   function selectRandomRecord(listings) {
@@ -214,6 +189,7 @@ const App = () => {
 
 function Listing({ randomRecord }) {
   console.log(randomRecord);
+  console.log(randomRecord.list_contract.contract_key);
   const buy = (e) => {
     e.preventDefault();
 
@@ -238,10 +214,9 @@ function Listing({ randomRecord }) {
     }).then(() => {
       //log for the reward
     }).catch((err) => {
-      console.error(err);
-      fieldset.disabled = false;
+      console.log(err);
     });
-  }
+  };
 
   return (
     <div className="listing">
@@ -289,10 +264,9 @@ function DegenListing({ randomRecord }) {
     }).then(() => {
       //log for the reward
     }).catch((err) => {
-      console.error(err);
-      fieldset.disabled = false;
+      console.log(err);
     });
-  }
+  };
 
   const replacer = (str, i, rep) => {
     if (!str) return;                      // Do nothing if no string passed
