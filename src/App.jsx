@@ -8,6 +8,8 @@ import { providers, utils } from "near-api-js";
 import axios from 'axios';
 import Switch from '@mui/material/Switch';
 
+const SUGGESTED_DONATION = '0';
+const BOATLOAD_OF_GAS = Big(3).times(10 ** 13).toFixed();
 
 const App = () => {
   const [account, setAccount] = useState(null);
@@ -53,7 +55,7 @@ const App = () => {
   const signOut = () => {
     selector.signOut().catch((err) => {
       console.log("Failed to sign out");
-      console.log(err);
+      console.error(err);
     });
   };
 
@@ -122,7 +124,6 @@ const App = () => {
     `;
     
     
-    
     const res = await axios.post(API_ENDPOINT, {
       query: fetchListingsQuery
     },{
@@ -187,11 +188,10 @@ const App = () => {
 
 function Listing({ randomRecord }) {
   console.log(randomRecord);
-  console.log(randomRecord.list_contract.contract_key);
-  console.log(randomRecord.list_price_str);
-  const buy = async (e) => {
-    
-  await selector.signAndSendTransactions({
+  const buy = (e) => {
+    e.preventDefault();
+
+    selector.signAndSendTransactions({
       transactions: [
         {
           receiverId: randomRecord.list_contract.contract_key,
@@ -212,9 +212,10 @@ function Listing({ randomRecord }) {
     }).then(() => {
       //log for the reward
     }).catch((err) => {
-      console.log(err);
+      console.error(err);
+      fieldset.disabled = false;
     });
-  };
+  }
 
   return (
     <div className="listing">
@@ -239,6 +240,8 @@ function Listing({ randomRecord }) {
 function DegenListing({ randomRecord }) {
   console.log(randomRecord);
   const buy = (e) => {
+    e.preventDefault();
+
     selector.signAndSendTransactions({
       transactions: [
         {
@@ -260,9 +263,10 @@ function DegenListing({ randomRecord }) {
     }).then(() => {
       //log for the reward
     }).catch((err) => {
-      console.log(err);
+      console.error(err);
+      fieldset.disabled = false;
     });
-  };
+  }
 
   const replacer = (str, i, rep) => {
     if (!str) return;                      // Do nothing if no string passed
