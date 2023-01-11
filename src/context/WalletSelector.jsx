@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState, createContext } from "react";
 import NearWalletSelector, { AccountInfo } from "@near-wallet-selector/core";
 import { setupNearWallet } from "@near-wallet-selector/near-wallet";
-import { setupSender } from "@near-wallet-selector/sender";
 
 const WalletSelectorContext =
     createContext(null);
@@ -40,8 +39,7 @@ export function WalletSelectorContextProvider({ children }) {
             network: "mainnet",
             contractId: "market.tradeport.near",
             wallets: [
-                setupNearWallet(),
-                setupSender()
+                setupNearWallet()
             ],
         })
         .then((instance) => {

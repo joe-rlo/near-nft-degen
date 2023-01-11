@@ -6,6 +6,7 @@ import { useWalletSelector } from './context/WalletSelector';
 import SignIn from './components/SignIn';
 import { providers, utils } from "near-api-js";
 import axios from 'axios';
+import Switch from '@mui/material/Switch';
 
 const SUGGESTED_DONATION = '0';
 const BOATLOAD_OF_GAS = Big(3).times(10 ** 13).toFixed();
@@ -14,7 +15,7 @@ const App = () => {
   const [account, setAccount] = useState(null);
   const [randomRecord, setRandomRecord] = useState(null);
   const { selector, accounts, accountId, setAccountId } = useWalletSelector();
-
+  const [isOn, setIsOn] = useState(false);
 
   const getAccount = useCallback(async () => {
     if (!accountId) {
@@ -113,6 +114,7 @@ const App = () => {
                 id
                 title
                 slug
+                description
               }
             }
           }
@@ -173,26 +175,36 @@ const App = () => {
     <main>
       <header>
         <h1>NEAR NFT Degen</h1>
-        { account
-          ? <button onClick={signOut}>Log out</button>
-          : <button onClick={signIn}>Log in</button>
-        }
       </header>
       { account
         ? (
           <>
             <div>
-              <button onClick={handleSwitchProvider}>Switch Provider</button>
               {accounts.length > 1 && (
                 <button onClick={handleSwitchAccount}>Switch Account</button>
               )}
             </div>
+            <div>
+              <label>
+                <Switch
+                  color='secondary'
+                  onChange={() => setIsOn(!isOn)}
+                  inputProps={{ 'aria-label': 'controlled' }}
+                />
+                Extra Degen Mode (Hidden image and obscured info)
+              </label>
+          </div>
            <button onClick={loadAndSelectRandomRecord}>Load and Select Random Record</button>
-      {randomRecord && <Listing randomRecord={randomRecord} />}
+            {randomRecord && isOn && <DegenListing randomRecord={randomRecord} />}
+            {randomRecord && !isOn && <Listing randomRecord={randomRecord} />}
           </>
         )
         : <SignIn/>
       }
+         { account
+          ? <button onClick={signOut}>Log out</button>
+          : <button onClick={signIn}>Log in</button>
+        }
       { !!account }
     </main>
   
@@ -237,7 +249,72 @@ function Listing({ randomRecord }) {
         <div>
           <img src={randomRecord.nft_state.nft_meta.image} width='300'/>
           <p>Name: {randomRecord.nft_state.nft_meta.name}</p>
-          <p>List price: {randomRecord.list_price_str/1000000000000000000000000}</p>
+          <p>Title: {randomRecord.nft_state.nft_meta.collection.title}</p>
+          <p>Description: {randomRecord.nft_state.nft_meta.collection.description}</p>
+          <p>List price: {randomRecord.list_price_str/1000000000000000000000000}N</p>
+          <button onClick={buy}>Buy</button>
+        </div>
+      ) : (
+        <p>Loading...</p>
+      )}
+    </div>
+  );
+
+  
+};
+
+function DegenListing({ randomRecord }) {
+  console.log(randomRecord);
+  const buy = (e) => {
+    e.preventDefault();
+
+    selector.signAndSendTransactions({
+      transactions: [
+        {
+          receiverId: randomRecord.list_contract.contract_key,
+          actions: [
+            {
+              type: "FunctionCall",
+              params: {
+                methodName: "buy",
+                contractId: randomRecord.list_contract.contract_key,
+                args: { price: randomRecord.list_price_str },
+                gas: "150000000000000",
+                deposit: randomRecord.list_price_str, // same as price
+              },
+            },
+          ],
+        },
+      ],
+    }).then(() => {
+      //log for the reward
+    }).catch((err) => {
+      console.error(err);
+      fieldset.disabled = false;
+    });
+  }
+
+  const replacer = (str, i, rep) => {
+    if (!str) return;                      // Do nothing if no string passed
+    const arr = [...str];                  // Convert String to Array
+    const len = arr.length
+    i = Math.min(Math.abs(i), len);        // Fix to Positive and not > len 
+    while (i) {
+      const r = ~~(Math.random() * len);
+      if (Array.isArray(arr[r])) continue; // Skip if is array (not a character)
+      arr[r] = [rep];                      // Insert an Array with the rep char
+      --i;
+    }
+    return arr.flat().join("");
+  };  
+  let hiddenName = replacer(randomRecord.nft_state.nft_meta.name, 8, "#");
+  return (
+    <div className="listing">
+      {randomRecord.nft_state.nft_meta.name ? (
+        <div>
+          <img src='http://readylayerone.s3.amazonaws.com/bb9.png' width='300'/>
+          <p>Name: {hiddenName} </p>
+          <p>List price: {randomRecord.list_price_str/1000000000000000000000000}N</p>
           <button onClick={buy}>Buy</button>
         </div>
       ) : (
