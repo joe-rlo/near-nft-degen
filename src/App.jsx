@@ -8,14 +8,15 @@ import { providers, utils } from "near-api-js";
 import axios from 'axios';
 import Switch from '@mui/material/Switch';
 
-const SUGGESTED_DONATION = '0';
-const BOATLOAD_OF_GAS = Big(3).times(10 ** 13).toFixed();
 
 const App = () => {
   const [account, setAccount] = useState(null);
   const [randomRecord, setRandomRecord] = useState(null);
   const { selector, accounts, accountId, setAccountId } = useWalletSelector();
   const [isOn, setIsOn] = useState(false);
+  const [rewardsuccess, setRewardSuccess] = useState(false)
+
+
 
   const getAccount = useCallback(async () => {
     if (!accountId) {
@@ -72,7 +73,7 @@ const App = () => {
     setAccountId(nextAccountId);
     alert("Switched account to " + nextAccountId);
   };
-
+  
   // Load the data from a JSON file and select a random record
   async function loadAndSelectRandomRecord() {
    
@@ -82,9 +83,9 @@ const App = () => {
     query FETCH_LISTINGS {
       near {
         nft_state_list(
-          limit: 10
+          limit: 100
           order_by: {list_block_datetime: desc}
-          where: {listed: {_eq: true}}
+          where: {listed: {_eq: true},list_price_str: {_lte: "10000000000"}}
         ) {
           id
           list_price
@@ -116,6 +117,13 @@ const App = () => {
                 slug
                 description
               }
+              smart_contract_id
+              smart_contract {
+                contract_key
+                contract_key_wrapper
+                name
+                id
+              }
             }
           }
         }
@@ -144,7 +152,87 @@ const App = () => {
     return listings[Math.floor(Math.random() * listings.length)];
   }
 
- 
+  const queryParams = new URLSearchParams(window.location.search)
+  const txHashes = queryParams.get("transactionHashes")
+  if(!txHashes){
+    //do nothing
+  }else{
+    const provider = new providers.JsonRpcProvider(
+      "https://rpc.mainnet.near.org"
+    );
+    
+    const TX_HASH = txHashes;
+    // account ID associated with the transaction
+    const ACCOUNT_ID = accountId;
+    
+    getState(TX_HASH, ACCOUNT_ID);
+    
+    async function getState(txHash, accountId) {
+      const result = await provider.txStatus(txHash, accountId);
+            if(result.transaction.signer_id == accountId){
+              if(result.transaction.actions[0].FunctionCall.method_name == 'buy'){
+                console.log("got amount: ", result.transaction.actions[0].FunctionCall.deposit);
+                //get reward - send txHash and amount
+               
+                  var data = JSON.stringify({
+                    "purchaseAmount": result.transaction.actions[0].FunctionCall.deposit,
+                    "degenMode":  isOn,
+                    "txHash": txHash
+                  });
+                
+                  var config = {
+                    method: 'post',
+                    url: 'http://api.shard.dog/rewardDrop',
+                    headers: { 
+                      'Content-Type': 'application/json'
+                    },
+                    data : data
+                  };
+                
+                  axios(config)
+                  .then(function (response) {
+                    //if 200 vs 201
+                    if(response.status == 201){
+                    console.log(JSON.stringify(response.data));
+                      var dataLink = JSON.stringify({
+                        "originalURL": response.body,
+                        "domain": "treat.shard.dog"
+                      });
+                      
+                      var configLink = {
+                        method: 'post',
+                        url: 'https://api.short.io/links/public',
+                        headers: { 
+                          'Authorization': 'pk_K3Y3TYEjOhmdDjXq', 
+                          'Content-Type': 'application/json'
+                        },
+                        data : dataLink
+                      };
+                      
+                      axios(configLink)
+                      .then(function (response) {
+                        console.log(response.body.secureShortURL);
+                        //output the button for reward
+                      })
+                      .catch(function (error) {
+                        console.log(error);
+                      });
+                    }else{
+                      //error on claim, output message
+                    }
+                  })
+                  .catch(function (error) {
+                    console.log(error);
+                  });
+                
+                
+              }
+            }
+          
+      console.log("Result: ", JSON.stringify(result));
+    }
+  }
+
   return (
     <main>
       <header>
@@ -200,8 +288,12 @@ function Listing({ randomRecord }) {
               type: "FunctionCall",
               params: {
                 methodName: "buy",
-                contractId: randomRecord.list_contract.contract_key,
-                args: { price: randomRecord.list_price_str },
+                contractId: randomRecord.nft_state.nft_meta.smart_contract.contract_key,
+                args: { 
+                  price: randomRecord.list_price_str,  
+                  nft_contract_id: randomRecord.nft_state.nft_meta.smart_contract.contract_key, 
+                  token_id:  randomRecord.nft_state.nft_meta.token_id
+                },
                 gas: "150000000000000",
                 deposit: randomRecord.list_price_str, // same as price
               },
@@ -237,6 +329,8 @@ function Listing({ randomRecord }) {
   
 };
 
+
+
 function DegenListing({ randomRecord }) {
   console.log(randomRecord);
   const buy = (e) => {
@@ -252,6 +346,7 @@ function DegenListing({ randomRecord }) {
               params: {
                 methodName: "buy",
                 contractId: randomRecord.list_contract.contract_key,
+                nft_contract_id: randomRecord.nft_state.nft_meta.smart_contract.contract_key,
                 args: { price: randomRecord.list_price_str },
                 gas: "150000000000000",
                 deposit: randomRecord.list_price_str, // same as price
@@ -261,7 +356,7 @@ function DegenListing({ randomRecord }) {
         },
       ],
     }).then(() => {
-      //log for the reward
+      //log for the reward      
     }).catch((err) => {
       console.error(err);
       fieldset.disabled = false;
@@ -294,10 +389,12 @@ function DegenListing({ randomRecord }) {
       ) : (
         <p>Loading...</p>
       )}
+      {rewardsuccess ? <div><h3>Claim or Share Your Reward</h3><p>{rewardsuccess}</p><a href={rewardsuccess}><button>Claim</button></a></div> : null }
     </div>
   );
 
   
 };
+
 
 export default App;
