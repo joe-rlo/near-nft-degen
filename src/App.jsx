@@ -182,7 +182,7 @@ const App = () => {
                 
                   var config = {
                     method: 'post',
-                    url: 'http://api.shard.dog/rewardDrop',
+                    url: 'https://api.shard.dog/rewardDrop',
                     headers: { 
                       'Content-Type': 'application/json'
                     },
