@@ -1,5 +1,6 @@
 import 'regenerator-runtime/runtime';
 import React, { useState, useEffect, useCallback } from 'react';
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import Big from 'big.js';
 import { useWalletSelector } from './context/WalletSelector';
@@ -7,6 +8,7 @@ import SignIn from './components/SignIn';
 import { providers, utils } from "near-api-js";
 import axios from 'axios';
 import Switch from '@mui/material/Switch';
+import { render } from 'react-dom';
 
 
 const App = () => {
@@ -14,7 +16,7 @@ const App = () => {
   const [randomRecord, setRandomRecord] = useState(null);
   const { selector, accounts, accountId, setAccountId } = useWalletSelector();
   const [isOn, setIsOn] = useState(false);
-  const [rewardsuccess, setRewardSuccess] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
 
 
@@ -46,6 +48,115 @@ const App = () => {
 
     getAccount().then((nextAccount) => {
       setAccount(nextAccount);
+      const queryParams = new URLSearchParams(window.location.search);
+      const txHashes = queryParams.get("transactionHashes");
+      if(!txHashes){
+        //do nothing
+      }else{
+        const provider = new providers.JsonRpcProvider(
+          "https://rpc.mainnet.near.org"
+        );
+        
+        const TX_HASH = txHashes;
+        // account ID associated with the transaction
+        const ACCOUNT_ID = accountId;
+        
+        getState(TX_HASH, ACCOUNT_ID);
+        setIsLoading(true);
+        {isLoading ? ReactDOM.render (<img src="https://shard.dog/img/sharddog_loading.gif" width="325px"/>, document.getElementById('rewards')) : null }
+        console.log("fired!");
+        async function getState(txHash, accountId) {
+          const result = await provider.txStatus(txHash, accountId);
+                if(result.transaction.signer_id == accountId){
+                  if(result.transaction.actions[0].FunctionCall.method_name == 'buy'){
+                    console.log("got amount: ", result.transaction.actions[0].FunctionCall.deposit);
+                    //get reward - send txHash and amount
+                    let degenMode;
+                    if (isOn === false){
+                      degenMode = 1;
+                    }else{
+                      degenMode = 1.5
+                    }
+                      var data = JSON.stringify({
+                        "purchaseAmount": result.transaction.actions[0].FunctionCall.deposit,
+                        "degenMode":  degenMode,
+                        "txHash": txHash
+                      });
+                    
+                      var config = {
+                        method: 'post',
+                        url: 'https://api.shard.dog/rewardDrop',
+                        headers: { 
+                          'Content-Type': 'application/json'
+                        },
+                        data : data
+                      };
+                    
+                      axios(config)
+                      .then(function (response) {
+                        //if 200 vs 201
+                        setIsLoading(true);
+                        console.log(response);
+                        if(response.data.statusCode == 201){
+                        console.log(JSON.stringify(response.data));
+                          var dataLink = JSON.stringify({
+                            "originalURL": response.data.body,
+                            "domain": "treat.shard.dog"
+                          });
+                          
+                          var configLink = {
+                            method: 'post',
+                            url: 'https://api.short.io/links/public',
+                            headers: { 
+                              'Authorization': 'pk_K3Y3TYEjOhmdDjXq', 
+                              'Content-Type': 'application/json'
+                            },
+                            data : dataLink
+                          };
+                          
+                          axios(configLink)
+                          .then(function (response) {
+                            setIsLoading(false);
+                            console.log(response.data.secureShortURL);
+                            //output the button for reward
+                            ReactDOM.render (
+                              <div>
+                                <h2>Reward!!!!!</h2>
+                                <h3>{response.data.secureShortURL}</h3>
+                                <p>You've earned some Neko but you'll need to claim it to see how much. <br/>If you don't want to claim, you can share this one time link with someone else.</p>
+                                <a href={response.data.secureShortURL}><button>Claim</button></a>
+                              </div>,
+                             document.getElementById('rewards')
+                            )
+                          })
+                          .catch(function (error) {
+                            console.log(error);
+                          });
+                        }else{
+                          //error on claim, output message
+                          setIsLoading(false);
+                          console.log(response.data.body);
+                          ReactDOM.render(
+                            <div>
+                              <h1>Oops No Reward</h1>
+                              <h2>{response.data.body}</h2>
+                            </div>,
+                             document.getElementById('rewards')
+                          )
+                        }
+                      })
+                      .catch(function (error) {
+                        setIsLoading(false);
+                        console.log(error);
+                      });
+                    
+                    
+                  }
+                }
+              
+          console.log("Result: ", JSON.stringify(result));
+        }
+      }
     });
   }, [accountId, getAccount]);
 
@@ -131,7 +242,7 @@ const App = () => {
     }
     `;
     
-    
+    setIsLoading(true);
     const res = await axios.post(API_ENDPOINT, {
       query: fetchListingsQuery
     },{
@@ -149,88 +260,8 @@ const App = () => {
   }
 
   function selectRandomRecord(listings) {
+    setIsLoading(false);
     return listings[Math.floor(Math.random() * listings.length)];
-  }
-
-  const queryParams = new URLSearchParams(window.location.search)
-  const txHashes = queryParams.get("transactionHashes")
-  if(!txHashes){
-    //do nothing
-  }else{
-    const provider = new providers.JsonRpcProvider(
-      "https://rpc.mainnet.near.org"
-    );
-    
-    const TX_HASH = txHashes;
-    // account ID associated with the transaction
-    const ACCOUNT_ID = accountId;
-    
-    getState(TX_HASH, ACCOUNT_ID);
-    
-    async function getState(txHash, accountId) {
-      const result = await provider.txStatus(txHash, accountId);
-            if(result.transaction.signer_id == accountId){
-              if(result.transaction.actions[0].FunctionCall.method_name == 'buy'){
-                console.log("got amount: ", result.transaction.actions[0].FunctionCall.deposit);
-                //get reward - send txHash and amount
-               
-                  var data = JSON.stringify({
-                    "purchaseAmount": result.transaction.actions[0].FunctionCall.deposit,
-                    "degenMode":  isOn,
-                    "txHash": txHash
-                  });
-                
-                  var config = {
-                    method: 'post',
-                    url: 'https://api.shard.dog/rewardDrop',
-                    headers: { 
-                      'Content-Type': 'application/json'
-                    },
-                    data : data
-                  };
-                
-                  axios(config)
-                  .then(function (response) {
-                    //if 200 vs 201
-                    if(response.status == 201){
-                    console.log(JSON.stringify(response.data));
-                      var dataLink = JSON.stringify({
-                        "originalURL": response.body,
-                        "domain": "treat.shard.dog"
-                      });
-                      
-                      var configLink = {
-                        method: 'post',
-                        url: 'https://api.short.io/links/public',
-                        headers: { 
-                          'Authorization': 'pk_K3Y3TYEjOhmdDjXq', 
-                          'Content-Type': 'application/json'
-                        },
-                        data : dataLink
-                      };
-                      
-                      axios(configLink)
-                      .then(function (response) {
-                        console.log(response.body.secureShortURL);
-                        //output the button for reward
-                      })
-                      .catch(function (error) {
-                        console.log(error);
-                      });
-                    }else{
-                      //error on claim, output message
-                    }
-                  })
-                  .catch(function (error) {
-                    console.log(error);
-                  });
-                
-                
-              }
-            }
-          
-      console.log("Result: ", JSON.stringify(result));
-    }
   }
 
   return (
@@ -259,6 +290,8 @@ const App = () => {
            <button onClick={loadAndSelectRandomRecord}>Load and Select Random Record</button>
             {randomRecord && isOn && <DegenListing randomRecord={randomRecord} />}
             {randomRecord && !isOn && <Listing randomRecord={randomRecord} />}
+            <br/>
+            {isLoading ? <img src="https://shard.dog/img/sharddog_loading.gif" width="325px"/> : null }
           </>
         )
         : <SignIn/>
@@ -346,8 +379,11 @@ function DegenListing({ randomRecord }) {
               params: {
                 methodName: "buy",
                 contractId: randomRecord.list_contract.contract_key,
-                nft_contract_id: randomRecord.nft_state.nft_meta.smart_contract.contract_key,
-                args: { price: randomRecord.list_price_str },
+                args: {  
+                  price: randomRecord.list_price_str,  
+                  nft_contract_id: randomRecord.nft_state.nft_meta.smart_contract.contract_key, 
+                  token_id:  randomRecord.nft_state.nft_meta.token_id 
+                },
                 gas: "150000000000000",
                 deposit: randomRecord.list_price_str, // same as price
               },
@@ -389,7 +425,6 @@ function DegenListing({ randomRecord }) {
       ) : (
         <p>Loading...</p>
       )}
-      {rewardsuccess ? <div><h3>Claim or Share Your Reward</h3><p>{rewardsuccess}</p><a href={rewardsuccess}><button>Claim</button></a></div> : null }
     </div>
   );
 
