@@ -187,6 +187,10 @@ const App = () => {
   
   // Load the data from a JSON file and select a random record
   async function loadAndSelectRandomRecord() {
+    ReactDOM.render(
+      <></>,
+       document.getElementById('rewards')
+    )
    
     const API_ENDPOINT = 'https://byz-multi-chain-01.hasura.app/v1/graphql';
 
