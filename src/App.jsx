@@ -277,6 +277,10 @@ const App = () => {
         ? (
           <>
             <div>
+            { account
+              ? <button onClick={signOut}>Log out</button>
+              : <button onClick={signIn}>Log in</button>
+            }
               {accounts.length > 1 && (
                 <button onClick={handleSwitchAccount}>Switch Account</button>
               )}
@@ -290,8 +294,13 @@ const App = () => {
                 />
                 Extra Degen Mode (Hidden image and obscured info)
               </label>
+              <br/>
+              <b>Directions</b><br/>
+              <small>On each NFT purchase you could win up to 15000 NEKO (MEOW, MEOW)<br/>
+              Transparency: You get one NEKO per NEAR spent plus a randomized bonus up to 15000 NEKO. The randomized bonus is automatically multipled if you choose "Extra Degen mode"<br/>
+              To get started, click the "Load A Random NFT" button.<br/></small>
           </div>
-           <button onClick={loadAndSelectRandomRecord}>Load and Select Random Record</button>
+           <button onClick={loadAndSelectRandomRecord}>Load A Random NFT</button>
             {randomRecord && isOn && <DegenListing randomRecord={randomRecord} />}
             {randomRecord && !isOn && <Listing randomRecord={randomRecord} />}
             <br/>
@@ -300,10 +309,10 @@ const App = () => {
         )
         : <SignIn/>
       }
-         { account
-          ? <button onClick={signOut}>Log out</button>
-          : <button onClick={signIn}>Log in</button>
-        }
+      { account
+              ? <></>
+              : <button onClick={signIn}>Log in</button>
+            }
       { !!account }
     </main>
   
