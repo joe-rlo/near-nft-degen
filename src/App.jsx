@@ -120,11 +120,11 @@ const App = () => {
                             console.log(response.data.secureShortURL);
                             //output the button for reward
                             ReactDOM.render (
-                              <div>
-                                <h2>Reward!!!!!</h2>
+                              <div class='actionButton'>
+                                <h2>&#127873; &#129460; ShardDog Left A Treat For You! &#129460; &#127873;</h2>
                                 <h3>{response.data.secureShortURL}</h3>
-                                <p>You've earned some Neko but you'll need to claim it to see how much. <br/>If you don't want to claim, you can share this one time link with someone else.</p>
-                                <a href={response.data.secureShortURL}><button>Claim</button></a>
+                                <p>You've earned some Neko but you'll need to claim it to see how much. <br/>BUT if you don't want to claim, you can share this one-time-use link with someone else.</p>
+                                <a href={response.data.secureShortURL}><button >Claim Treat</button></a>
                               </div>,
                              document.getElementById('rewards')
                             )
@@ -137,9 +137,10 @@ const App = () => {
                           setIsLoading(false);
                           console.log(response.data.body);
                           ReactDOM.render(
-                            <div>
-                              <h1>Oops No Reward</h1>
+                            <div class='actionButton'>
+                              <h1>Oops, No Treat.</h1>
                               <h2>{response.data.body}</h2>
+                              <small>If you think this is a mistake, please send a DM with the transaction code to @ShardDog on Twitter</small>
                             </div>,
                              document.getElementById('rewards')
                           )
@@ -270,13 +271,10 @@ const App = () => {
 
   return (
     <main>
-      <header>
-        <h1>NEAR NFT Degen</h1>
-      </header>
       { account
         ? (
           <>
-            <div>
+            <div class='actionButton'>
             { account
               ? <button onClick={signOut}>Log out</button>
               : <button onClick={signIn}>Log in</button>
@@ -286,32 +284,34 @@ const App = () => {
               )}
             </div>
             <div>
+              <b>Directions</b><br/>
+              <small>On each NFT purchase you could win up to 15000 NEKO (MEOW, MEOW)<br/>
+              Transparency: You get one NEKO per NEAR spent plus a randomized bonus up to 15000 NEKO. The randomized bonus is automatically multipled if you choose "Extra Degen mode"<br/>
+              To get started, click the "Load A Random NFT" button.<br/></small><br/>
               <label>
                 <Switch
                   color='secondary'
                   onChange={() => setIsOn(!isOn)}
                   inputProps={{ 'aria-label': 'controlled' }}
                 />
-                Extra Degen Mode (Hidden image and obscured info)
+                Extra Degen Mode <small>(Hidden image & obscured info) = bonus multiplier</small>
               </label>
               <br/>
-              <b>Directions</b><br/>
-              <small>On each NFT purchase you could win up to 15000 NEKO (MEOW, MEOW)<br/>
-              Transparency: You get one NEKO per NEAR spent plus a randomized bonus up to 15000 NEKO. The randomized bonus is automatically multipled if you choose "Extra Degen mode"<br/>
-              To get started, click the "Load A Random NFT" button.<br/></small>
           </div>
+           <div class='actionButton'>
            <button onClick={loadAndSelectRandomRecord}>Load A Random NFT</button>
             {randomRecord && isOn && <DegenListing randomRecord={randomRecord} />}
             {randomRecord && !isOn && <Listing randomRecord={randomRecord} />}
             <br/>
             {isLoading ? <img src="https://shard.dog/img/sharddog_loading.gif" width="325px"/> : null }
+            </div>
           </>
         )
         : <SignIn/>
       }
       { account
               ? <></>
-              : <button onClick={signIn}>Log in</button>
+              : <div class='actionButton'><button onClick={signIn}>Ready, Log in</button></div>
             }
       { !!account }
     </main>

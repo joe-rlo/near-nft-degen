@@ -1,44 +1,252 @@
 * {
   box-sizing: border-box;
 }
+/*
+! tailwindcss v3.1.4 | MIT License | https://tailwindcss.com
+*/
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,400;0,700;1,400&display=swap');
+
+*, :after, :before {
+    box-sizing: border-box;
+    border:0 solid
+}
+
+:after, :before {
+    --tw-content: ""
+}
 
 html {
-  --bg: #fff;
-  --fg: #25282A;
-  --gray: #888;
-  --royal: #0072CE;
-  --blue: #6AD1E3;
-  --primary: #D1CCBD;
-  --secondary: var(--royal);
-  --tertiary: #FF585D;
-
-  background-color: var(--bg);
-  color: var(--fg);
-  font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-  font-size: calc(.65em + 0.7vw);
-  line-height: 1.3;
-
-  ::selection {
-    background: var(--secondary);
-    color: var(--bg);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    --bg: #25282A;
-    --fg: #fff;
-    --secondary: var(--blue);
-
-    ::selection {
-      background: var(--secondary);
-      color: var(--fg);
-    }
-  }
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    font-family: 'IBM Plex Mono', BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji
 }
 
 body {
+    margin: 0;
+    line-height:inherit;
+    background: url('/assets/18.png') no-repeat center center fixed;
+      -webkit-background-size: cover;
+      -moz-background-size: cover;
+      -o-background-size: cover;
+    background-size: cover !important;
+    padding:0;
+}
+
+hr {
+    height: 0;
+    color: inherit;
+    border-top-width:1px
+}
+
+abbr:where([title]) {
+    -webkit-text-decoration: underline dotted;
+    text-decoration:underline dotted
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-size: inherit;
+    font-weight:inherit
+}
+
+a {
+    color: inherit;
+    text-decoration:inherit
+}
+
+b, strong {
+    font-weight:bolder
+}
+
+
+pre {
+    font-family: 'IBM Plex Mono', SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+}
+
+p {
+    white-space:pre-wrap;
+    margin-bottom:.5rem;
+
+}
+
+small {
+    font-size:80%
+}
+
+sub, sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align:baseline
+}
+
+sub {
+    bottom:-.25em
+}
+
+sup {
+    top:-.5em
+}
+
+table {
+    text-indent: 0;
+    border-color: inherit;
+    border-collapse:collapse
+}
+
+button, input, optgroup, select, textarea {
+    display: inline;
+    width: 200px;
+    height: 50px;
+    position: relative;
+    cursor: pointer;
+    background-color: #000;
+    border: 1px solid #000;
+    border-top-color: #262626;
+    border-right-color: #404040;
+    border-bottom-color: #404040;
+    border-left-color: #262626;
+    border-radius: 5px;
+    border-color: #97ffff;
+    box-shadow: 0 0 20px 0 rgba(100, 200, 255, 0.75);
+    z-index: 0;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 500ms;
+}
+
+button, select {
+    text-transform:none
+}
+
+[type=button], [type=reset], [type=submit], button {
+    -webkit-appearance: button;
+    background-color: transparent;
+    background-image:none
+}
+
+.mb-2 {
+  margin-bottom:.5rem
+}
+
+.flex {
+  display:flex
+}
+
+.h-full {
+  height:100%
+}
+
+.w-full {
+  width:100%
+}
+
+.min-w-max {
+  min-width: -webkit-max-content;
+  min-width: -moz-max-content;
+  min-width:max-content
+}
+
+.flex-shrink {
+  flex-shrink:1
+}
+
+.flex-grow {
+  flex-grow:1
+}
+
+.flex-row {
+  flex-direction:row
+}
+
+.space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(.5rem * var(--tw-space-x-reverse));
+  margin-left:calc(.5rem * calc(1 - var(--tw-space-x-reverse)))
+}
+
+
+
+.whitespace-pre-wrap {
+  white-space:pre-wrap
+}
+
+.rounded {
+  border-radius:.25rem
+}
+
+.border {
+  border-width:1px
+}
+
+.p-2 {
+  padding:.5rem
+}
+
+.text-xs {
+  font-size: .75rem;
+  line-height:1rem;
+  max-width: 1300px;
+}
+
+.filter {
+  filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)
+}
+
+
+div#__next {
+  padding-top: 1em;
+  clear: both;
   margin: 0 auto;
-  padding: 0 1em;
-  max-width: 40em;
+  max-height: 90%;
+  overflow:auto;
+  max-width: 85%;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height:10px
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius:5px
+}
+
+a {
+  text-decoration:underline
+}
+
+.focus\:outline-none:focus {
+  outline: 2px solid transparent;
+  outline-offset:2px
+}
+
+@media (min-width: 768px) {
+  .md\:min-w-full {
+      min-width:100%
+  }
+
+  .md\:text-base {
+      font-size: 1rem;
+      line-height: 1.5rem
+  }
+}
+
+nav{
+  text-align: right;
+  margin-bottom: 10px;
+  padding-right: 10px;
+}
+
+@media screen and (max-width: 415px) {
+  nav{
+      clear: both;
+      text-align: right;
+      margin-bottom: 10px;
+      padding-right: 10px;
+  }
 }
 
 fieldset {
@@ -121,12 +329,23 @@ button {
   margin-left: -0.5em;
 }
 
+.actionButton{
+  text-align: center;
+  margin: 0 auto;
+}
+
+.listing{
+  padding-top: 20px;
+  text-align: center;
+  margin: 0 auto;
+}
+
 $color_1: white;
 $font-family_1: sans-serif;
 $background-color_1: rgba(255, 255, 255, 0.1);
 
 .fab-wrapper {
-	position: fixed;
+	position: relative;
 	top: 5rem;
 	right: 3rem;
 	background-image: url('https://readylayerone.s3.amazonaws.com/sharddog_sm.png');
