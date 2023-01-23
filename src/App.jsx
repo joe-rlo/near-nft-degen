@@ -199,9 +199,9 @@ const App = () => {
     query FETCH_LISTINGS {
       near {
         nft_state_list(
-          limit: 100
+          limit: 1000
           order_by: {list_block_datetime: desc}
-          where: {listed: {_eq: true},list_price_str: {_lte: "10000000000"}}
+          where: {listed: {_eq: true},list_price_str: {_gte: "10000000000"}}
         ) {
           id
           list_price
@@ -287,7 +287,7 @@ const App = () => {
               <b>Directions</b><br/>
               <small>On each NFT purchase you could win up to 15000 NEKO (MEOW, MEOW)<br/>
               Transparency: You get one NEKO per NEAR spent plus a randomized bonus up to 15000 NEKO. The randomized bonus is automatically multipled if you choose "Extra Degen mode"<br/>
-              To get started, click the "Load A Random NFT" button.<br/></small><br/>
+              To get started, click the "Load A Random NFT" button. If you don't like what you see, click again.<br/></small><br/>
               <label>
                 <Switch
                   color='secondary'
