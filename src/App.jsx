@@ -1,5 +1,5 @@
 import 'regenerator-runtime/runtime';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import Big from 'big.js';
@@ -17,7 +17,20 @@ const App = () => {
   const { selector, accounts, accountId, setAccountId } = useWalletSelector();
   const [isOn, setIsOn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [switchValue, setSwitchValue] = useState(false);
+  const [degenCount, setDegenCount] = useState(0);
+  const [selectedOption, setSelectedOption] = useState('option1');
 
+  const handleOptionChange = (event) => {
+    setSelectedOption(event.target.value);
+  };
+  
+  const handleSwitchChange = () => {
+    setSwitchValue(!switchValue);
+    setDegenCount(degenCount + 1);
+    setIsOn(!isOn);
+    console.log(degenCount);
+  };
 
 
   const getAccount = useCallback(async () => {
@@ -72,11 +85,14 @@ const App = () => {
                     console.log("got amount: ", result.transaction.actions[0].FunctionCall.deposit);
                     //get reward - send txHash and amount
                     let degenMode;
-                    if (isOn === false){
+                    if (degenCount > 1 || (degenCount == 0 && !isOn)){
                       degenMode = 1;
-                    }else{
-                      degenMode = 1.5
+                      degenCount = 0;
+                    }else if (degenCount == 0 && isOn){
+                      degenMode = 1.5;
+                      degenCount = 0;
                     }
+                      
                       var data = JSON.stringify({
                         "purchaseAmount": result.transaction.actions[0].FunctionCall.deposit,
                         "degenMode":  degenMode,
@@ -120,7 +136,7 @@ const App = () => {
                             console.log(response.data.secureShortURL);
                             //output the button for reward
                             ReactDOM.render (
-                              <div class='actionButton'>
+                              <div className='actionButton'>
                                 <h2>&#127873; &#129460; ShardDog Left A Treat For You! &#129460; &#127873;</h2>
                                 <h3>{response.data.secureShortURL}</h3>
                                 <p>You've earned some Neko but you'll need to claim it to see how much. <br/>BUT if you don't want to claim, you can share this one-time-use link with someone else.</p>
@@ -137,7 +153,7 @@ const App = () => {
                           setIsLoading(false);
                           console.log(response.data.body);
                           ReactDOM.render(
-                            <div class='actionButton'>
+                            <div className='actionButton'>
                               <h1>Oops, No Treat.</h1>
                               <h2>{response.data.body}</h2>
                               <small>If you think this is a mistake, please send a DM with the transaction code to @ShardDog on Twitter</small>
@@ -194,6 +210,19 @@ const App = () => {
     )
    
     const API_ENDPOINT = 'https://byz-multi-chain-01.hasura.app/v1/graphql';
+    let lte,gte;
+
+    if (selectedOption == 'option1'){
+      lte = '5000000000000000000000000'; gte = '1000000000000000000000000';
+    }else if(selectedOption == 'option2'){
+      lte = '15000000000000000000000000'; gte = '5000000000000000000000000';
+    }else if(selectedOption == 'option3'){
+      lte = '50000000000000000000000002'; gte = '15000000000000000000000002';
+    }else if(selectedOption == 'option4'){
+      lte = '5000000000000000000000000001'; gte = '50000000000000000000000002';
+    }else{
+      lte = '20000000000000000000000000'; gte = '1000000000000000000000000';
+    }
 
     const fetchListingsQuery = `
     query FETCH_LISTINGS {
@@ -201,7 +230,7 @@ const App = () => {
         nft_state_list(
           limit: 1000
           order_by: {list_block_datetime: desc}
-          where: {listed: {_eq: true},list_price_str: {_gte: "10000000000"}}
+          where: {listed: {_eq: true},list_price_str: {_lte: "`+lte+`", _gte: "`+gte+`"}}
         ) {
           id
           list_price
@@ -266,6 +295,7 @@ const App = () => {
 
   function selectRandomRecord(listings) {
     setIsLoading(false);
+    let degenCount = 0;
     return listings[Math.floor(Math.random() * listings.length)];
   }
 
@@ -274,7 +304,7 @@ const App = () => {
       { account
         ? (
           <>
-            <div class='actionButton'>
+            <div className='actionButton'>
             { account
               ? <button onClick={signOut}>Log out</button>
               : <button onClick={signIn}>Log in</button>
@@ -288,20 +318,64 @@ const App = () => {
               <small>On each NFT purchase you could win up to 15000 NEKO (MEOW, MEOW)<br/>
               Transparency: You get one NEKO per NEAR spent plus a randomized bonus up to 15000 NEKO. The randomized bonus is automatically multipled if you choose "Extra Degen mode"<br/>
               To get started, click the "Load A Random NFT" button. If you don't like what you see, click again.<br/></small><br/>
+              Pick your degen level:<br/>
+              <div className="button-bar">
+              <div className={`button ${selectedOption === 'option1' ? 'active' : ''}`}>
+                <input
+                  type="radio"
+                  name="group1"
+                  value="option1"
+                  checked={selectedOption === 'option1'}
+                  onChange={handleOptionChange}
+                /><br/>
+              🤑
+              </div>
+              <div className={`button ${selectedOption === 'option2' ? 'active' : ''}`}>
+                <input
+                  type="radio"
+                  name="group1"
+                  value="option2"
+                  checked={selectedOption === 'option2'}
+                  onChange={handleOptionChange}
+                /><br/>
+                🤑🤑
+              </div>
+              <div className={`button ${selectedOption === 'option3' ? 'active' : ''}`}>
+                <input
+                  type="radio"
+                  name="group1"
+                  value="option3"
+                  checked={selectedOption === 'option3'}
+                  onChange={handleOptionChange}
+                /><br/>
+                🤑🤑🤑
+              </div>
+              <div className={`button ${selectedOption === 'option4' ? 'active' : ''}`}>
+                <input
+                  type="radio"
+                  name="group1"
+                  value="option4"
+                  checked={selectedOption === 'option4'}
+                  onChange={handleOptionChange}
+                /><br/>
+                🤑🤑🤑🤑
+              </div>
+            </div>
               <label>
                 <Switch
                   color='secondary'
-                  onChange={() => setIsOn(!isOn)}
+                  onChange={handleSwitchChange}
                   inputProps={{ 'aria-label': 'controlled' }}
                 />
                 Extra Degen Mode <small>(Hidden image & obscured info) = bonus multiplier</small>
               </label>
               <br/>
           </div>
-           <div class='actionButton'>
+           <div className='actionButton'>
            <button onClick={loadAndSelectRandomRecord}>Load A Random NFT</button>
-            {randomRecord && isOn && <DegenListing randomRecord={randomRecord} />}
+            {randomRecord && isOn && <DegenListing randomRecord={randomRecord} degenCount={degenCount} />}
             {randomRecord && !isOn && <Listing randomRecord={randomRecord} />}
+            {!randomRecord && <NoListing />}
             <br/>
             {isLoading ? <img src="https://shard.dog/img/sharddog_loading.gif" width="325px"/> : null }
             </div>
@@ -311,7 +385,7 @@ const App = () => {
       }
       { account
               ? <></>
-              : <div class='actionButton'><button onClick={signIn}>Ready, Log in</button></div>
+              : <div className='actionButton'><button onClick={signIn}>Ready, Log in</button></div>
             }
       { !!account }
     </main>
@@ -359,6 +433,7 @@ function Listing({ randomRecord }) {
     <div className="listing">
       {randomRecord.nft_state.nft_meta.name ? (
         <div>
+          <p><small>No Multiplier</small></p>
           <img src={randomRecord.nft_state.nft_meta.image} width='300'/>
           <p>Name: {randomRecord.nft_state.nft_meta.name}</p>
           <p>Title: {randomRecord.nft_state.nft_meta.collection.title}</p>
@@ -377,7 +452,7 @@ function Listing({ randomRecord }) {
 
 
 
-function DegenListing({ randomRecord }) {
+function DegenListing({ randomRecord, degenCount }) {
   console.log(randomRecord);
   const buy = (e) => {
     e.preventDefault();
@@ -430,6 +505,7 @@ function DegenListing({ randomRecord }) {
     <div className="listing">
       {randomRecord.nft_state.nft_meta.name ? (
         <div>
+          <p>{(degenCount && isOn) ? <small>No Multiplier</small>:<>Degen Multiplier</>}</p>
           <img src='http://readylayerone.s3.amazonaws.com/bb9.png' width='300'/>
           <p>Name: {hiddenName} </p>
           <p>List price: {randomRecord.list_price_str/1000000000000000000000000}N</p>
@@ -444,5 +520,20 @@ function DegenListing({ randomRecord }) {
   
 };
 
+
+function NoListing() {
+  
+  return (
+    <div className="listing">
+        <div>
+          <p><large>No Listings, Try Again</large></p>
+          
+  
+        </div>
+    </div>
+  );
+
+  
+};
 
 export default App;
