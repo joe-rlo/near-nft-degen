@@ -318,7 +318,7 @@ const App = () => {
               <small>On each NFT purchase you could win up to 15000 NEKO (MEOW, MEOW)<br/>
               Transparency: You get one NEKO per NEAR spent plus a randomized bonus up to 15000 NEKO. The randomized bonus is automatically multipled if you choose "Extra Degen mode"<br/>
               To get started, click the "Load A Random NFT" button. If you don't like what you see, click again.<br/></small><br/>
-              Pick your degen level:<br/>
+              <center>Pick your degen level:</center><br/>
               <div className="button-bar">
               <div className={`button ${selectedOption === 'option1' ? 'active' : ''}`}>
                 <input
@@ -361,6 +361,7 @@ const App = () => {
                 🤑🤑🤑🤑
               </div>
             </div>
+              <div className='actionButton'>
               <label>
                 <Switch
                   color='secondary'
@@ -369,6 +370,7 @@ const App = () => {
                 />
                 Extra Degen Mode <small>(Hidden image & obscured info) = bonus multiplier</small>
               </label>
+              </div>
               <br/>
           </div>
            <div className='actionButton'>
