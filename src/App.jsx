@@ -204,6 +204,7 @@ const App = () => {
   
   // Load the data from a JSON file and select a random record
   async function loadAndSelectRandomRecord() {
+    window.history.pushState({}, document.title, "/");
     ReactDOM.render(
       <></>,
        document.getElementById('rewards')
