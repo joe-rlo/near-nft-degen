@@ -87,10 +87,10 @@ const App = () => {
                     let degenMode;
                     if (degenCount > 1 || (degenCount == 0 && !isOn)){
                       degenMode = 1;
-                      degenCount = 0;
+                      setDegenCount(0);
                     }else if (degenCount == 0 && isOn){
                       degenMode = 1.5;
-                      degenCount = 0;
+                      setDegenCount(0);
                     }
                       
                       var data = JSON.stringify({
@@ -156,7 +156,7 @@ const App = () => {
                             <div className='actionButton'>
                               <h1>Oops, No Treat.</h1>
                               <h2>{response.data.body}</h2>
-                              <small>If you think this is a mistake, please send a DM with the transaction code to @ShardDog on Twitter</small>
+                              <small>If you think this is a mistake, please send a DM with the transaction hash to @ShardDog on Twitter</small>
                             </div>,
                              document.getElementById('rewards')
                           )
@@ -217,11 +217,11 @@ const App = () => {
     }else if(selectedOption == 'option2'){
       lte = '15000000000000000000000000'; gte = '5000000000000000000000000';
     }else if(selectedOption == 'option3'){
-      lte = '50000000000000000000000002'; gte = '15000000000000000000000002';
+      lte = '50000000000000000000000002'; gte = '15000000000000000000000001';
     }else if(selectedOption == 'option4'){
       lte = '5000000000000000000000000001'; gte = '50000000000000000000000002';
     }else{
-      lte = '20000000000000000000000000'; gte = '1000000000000000000000000';
+      lte = '5000000000000000000000000'; gte = '10000000000000000000';
     }
 
     const fetchListingsQuery = `
@@ -230,7 +230,7 @@ const App = () => {
         nft_state_list(
           limit: 1000
           order_by: {list_block_datetime: desc}
-          where: {listed: {_eq: true},list_price_str: {_lte: "`+lte+`", _gte: "`+gte+`"}}
+          where: {listed: {_eq: true},list_price: {_lte: "`+lte+`", _gte: "`+gte+`"}}
         ) {
           id
           list_price
@@ -295,7 +295,7 @@ const App = () => {
 
   function selectRandomRecord(listings) {
     setIsLoading(false);
-    let degenCount = 0;
+    setDegenCount(0);
     return listings[Math.floor(Math.random() * listings.length)];
   }
 
@@ -377,7 +377,8 @@ const App = () => {
            <button onClick={loadAndSelectRandomRecord}>Load A Random NFT</button>
             {randomRecord && isOn && <DegenListing randomRecord={randomRecord} degenCount={degenCount} />}
             {randomRecord && !isOn && <Listing randomRecord={randomRecord} />}
-            {!randomRecord && <NoListing />}
+            {!randomRecord && !isOn && <NoListing />}
+            {!randomRecord && isOn && <NoListing />}
             <br/>
             {isLoading ? <img src="https://shard.dog/img/sharddog_loading.gif" width="325px"/> : null }
             </div>
@@ -507,7 +508,7 @@ function DegenListing({ randomRecord, degenCount }) {
     <div className="listing">
       {randomRecord.nft_state.nft_meta.name ? (
         <div>
-          <p>{(degenCount && isOn) ? <small>No Multiplier</small>:<>Degen Multiplier</>}</p>
+          <p>{(degenCount) ? <small>No Multiplier</small>:<>Degen Multiplier</>}</p>
           <img src='http://readylayerone.s3.amazonaws.com/bb9.png' width='300'/>
           <p>Name: {hiddenName} </p>
           <p>List price: {randomRecord.list_price_str/1000000000000000000000000}N</p>
@@ -524,16 +525,27 @@ function DegenListing({ randomRecord, degenCount }) {
 
 
 function NoListing() {
-  
-  return (
-    <div className="listing">
-        <div>
-          <p><large>No Listings, Try Again</large></p>
-          
-  
-        </div>
-    </div>
-  );
+  const queryParams = new URLSearchParams(window.location.search);
+  const txHashes = queryParams.get("transactionHashes");
+  if(!txHashes){
+    return (
+      <div className="listing">
+          <div>
+            <p><large>No Listings, Try Again</large></p>
+            
+    
+          </div>
+      </div>
+    );
+  }else{
+    return (
+      <div className="listing">
+          <div>
+            <p></p>
+          </div>
+      </div>
+    );
+  }
 
   
 };
