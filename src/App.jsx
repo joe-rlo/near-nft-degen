@@ -278,13 +278,14 @@ const App = () => {
     `;
     
     setIsLoading(true);
+    //This is the old tradeport API setup -- Needs updating
     const res = await axios.post(API_ENDPOINT, {
       query: fetchListingsQuery
     },{
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key' : 'faaA4Jc.358b884afd7ba87d7385c26b22609756',
-        'Hasura-Client-Name' : 'Ready Layer One' 
+        'x-api-key' : NEWKEY,
+        'Hasura-Client-Name' : CLIENTNAME 
       }
     });
     
